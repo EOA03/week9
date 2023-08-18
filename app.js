@@ -48,7 +48,7 @@ mysqlCon.connect((err)=>{
 app.use(bodyParser.json())
 
 app.get('/user', (req, res)=>{
-  mysqlCon.query("select * from week9.users", (err, result, fields) => {
+  mysqlCon.query("select * from users", (err, result, fields) => {
       if (err) {
           console.error(err)
           res.status(500).json(commonResponse(null, "server error"))
@@ -97,8 +97,8 @@ app.get('/user/:id', async (req, res) => {
                       )
                     ) AS expense
             from
-                week9.users as u
-                left join week9.transactions as t on u.id = t.user_id
+                users as u
+                left join transactions as t on u.id = t.user_id
             where
                 u.id = ?
             group by
@@ -116,7 +116,7 @@ app.get('/user/:id', async (req, res) => {
 })
 
 app.get('/transaction', (req, res)=>{
-  mysqlCon.query("select * from week9.transactions", (err, result, fields)=>{
+  mysqlCon.query("select * from transactions", (err, result, fields)=>{
     if(err){
       console.error(err)
       res.status(500).json(commonResponse(null, "server error"))
@@ -135,7 +135,7 @@ app.post('/transaction', async (req, res) => {
 
         const dbData = await query(
           `insert into
-            week9.transactions (type, amount, user_id)
+            transactions (type, amount, user_id)
           values
             (?, ?, ?)`,
           [body.type, body.amount, body.user_id])
@@ -159,7 +159,7 @@ app.put('/transaction/:id', async (req, res)=>{
     const body = req.body
     const dbData = await query(
       `update
-        week9.transactions
+        transactions
       set
         type = ?, amount = ?, user_id = ?
       where
@@ -181,13 +181,13 @@ app.put('/transaction/:id', async (req, res)=>{
 app.delete('/transaction/:id', async (req, res)=>{
     try {
         const id = req.params.id
-        const data = await query("select id from week9.transactions where id = ?", id)
+        const data = await query("select id from transactions where id = ?", id)
         if (Object.keys(data).length === 0) {
             res.status(404).json(commonResponse(null, "data not found"))
             res.end()
             return
         }
-        await query("delete from week9.transactions where id = ?", id)
+        await query("delete from transactions where id = ?", id)
 
         res.status(200).json(commonResponse({
             id: id
